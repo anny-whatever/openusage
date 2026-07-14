@@ -1,0 +1,12 @@
+{
+  "schema": "openusage.provider-snapshot.v1",
+  "snapshot": {
+    "providerId": "fixture",
+    "displayName": "Fixture Provider",
+    "lines": [
+      { "type": "badge", "label": "Status", "text": "One" },
+      { "type": "badge", "label": "Status", "text": "Two" }
+    ],
+    "refreshedAt": "2026-07-14T12:00:00Z"
+  }
+}

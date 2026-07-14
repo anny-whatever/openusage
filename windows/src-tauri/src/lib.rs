@@ -6,6 +6,10 @@ use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{Manager, WindowEvent};
 
+pub mod contracts;
+pub mod platform;
+pub mod runtime;
+
 const MAIN_WINDOW_LABEL: &str = "main";
 const SHOW_MENU_ID: &str = "show";
 const QUIT_MENU_ID: &str = "quit";

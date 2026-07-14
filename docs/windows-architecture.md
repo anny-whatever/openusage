@@ -41,7 +41,7 @@ The Windows workspace follows feature ownership rather than one large UI or back
 - `windows/src-tauri/src/` contains the Rust composition root, platform adapters, providers, stores,
   services, and Tauri lifecycle.
 - `windows/src-tauri/capabilities/` contains the explicit WebView permission boundary.
-- `Tests/Fixtures/ProviderParity/` will contain language-neutral provider inputs and normalized outputs
+- `Tests/Fixtures/ProviderParity/` contains language-neutral provider inputs and normalized outputs
   consumed by both Swift and Rust tests.
 
 Files stay below 500 lines, React components stay below 200 lines, and runtime modules have one clear
@@ -86,6 +86,26 @@ The Rust composition root owns every long-lived task and cancels it during shutd
 The expected refresh path is `O(P + M + delta-log-rows)`, where `P` is the provider count and `M` is the
 visible metric count. Retained memory is `O(P * M)` plus fixed 30-day history and explicitly bounded
 caches.
+
+## P2 Runtime Foundation
+
+The first trusted runtime layer is implemented below `windows/src-tauri/src/`:
+
+- `contracts/` owns the `openusage.provider-snapshot.v1` and `openusage.limits.v1` wire schemas. It
+  validates identifiers, timestamps, day keys, duplicate resources and metrics, progress ranges, and
+  every numeric boundary before normalized data is persisted or exposed.
+- `platform/` owns native environment and path discovery, same-directory atomic replacement, DPAPI
+  secret protection, WAL-aware read-only SQLite snapshots, bounded subprocess execution, asynchronous
+  HTTP with system or explicit proxy support, and redacting two-file log rotation.
+- `runtime/` owns versioned settings migration, one-snapshot-per-provider persistence, five-minute
+  session freshness, stale-while-revalidate display, fixed failure backoff, first-run credential probes,
+  coalesced per-provider refreshes, and a global refresh semaphore.
+
+Persisted snapshots paint immediately after launch but never count as fresh in a new process. The first
+refresh of every enabled provider therefore runs once per session; subsequent refreshes reuse a
+successful snapshot for five minutes. Failed snapshots are not persisted, missing history on a later
+successful response preserves the last successful history, and wake notifications use a one-item
+channel so repeated resume or settings events cannot create an unbounded queue.
 
 ## Storage and Credentials
 

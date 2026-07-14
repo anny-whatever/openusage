@@ -1,0 +1,9 @@
+{
+  "schema": "openusage.provider-snapshot.v1",
+  "snapshot": {
+    "providerId": "fixture",
+    "displayName": "Fixture Provider",
+    "lines": [],
+    "refreshedAt": "not-a-date"
+  }
+}

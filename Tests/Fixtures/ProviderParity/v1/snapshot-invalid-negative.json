@@ -1,0 +1,15 @@
+{
+  "schema": "openusage.provider-snapshot.v1",
+  "snapshot": {
+    "providerId": "fixture",
+    "displayName": "Fixture Provider",
+    "lines": [
+      {
+        "type": "values",
+        "label": "Today",
+        "values": [{ "number": -1, "kind": "count", "estimated": false }]
+      }
+    ],
+    "refreshedAt": "2026-07-14T12:00:00Z"
+  }
+}

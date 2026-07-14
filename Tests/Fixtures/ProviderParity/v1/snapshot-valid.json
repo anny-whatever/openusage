@@ -1,0 +1,56 @@
+{
+  "schema": "openusage.provider-snapshot.v1",
+  "snapshot": {
+    "providerId": "fixture",
+    "displayName": "Fixture Provider",
+    "plan": "Pro",
+    "lines": [
+      {
+        "type": "text",
+        "label": "Notice",
+        "value": "Usage is available"
+      },
+      {
+        "type": "values",
+        "label": "Today",
+        "values": [
+          { "number": 0, "kind": "dollars", "label": "USD", "estimated": true },
+          { "number": 1250, "kind": "count", "label": "tokens", "estimated": false }
+        ],
+        "expiriesAt": ["2026-07-15T12:00:00Z"],
+        "unknownModels": ["fixture-model"]
+      },
+      {
+        "type": "progress",
+        "label": "Session",
+        "used": 25,
+        "limit": 100,
+        "format": { "kind": "percent" },
+        "resetsAt": "2026-07-15T12:00:00Z",
+        "periodDurationMs": 18000000
+      },
+      {
+        "type": "badge",
+        "label": "Status",
+        "text": "Active"
+      },
+      {
+        "type": "chart",
+        "label": "Usage Trend",
+        "points": [
+          { "value": 10, "label": "Jul 13", "valueLabel": "10 tokens" },
+          { "value": 20, "label": "Jul 14" }
+        ],
+        "note": "Local history"
+      }
+    ],
+    "refreshedAt": "2026-07-14T12:00:00Z",
+    "usageHistory": {
+      "days": [
+        { "date": "2026-07-13", "value": 10 },
+        { "date": "2026-07-14", "value": 20 }
+      ]
+    },
+    "warning": "Partial provider data"
+  }
+}
