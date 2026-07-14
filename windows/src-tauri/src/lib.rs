@@ -8,6 +8,7 @@ use tauri::{Manager, WindowEvent};
 
 pub mod contracts;
 pub mod platform;
+pub mod providers;
 pub mod runtime;
 
 const MAIN_WINDOW_LABEL: &str = "main";

@@ -196,9 +196,9 @@ impl Validate for MetricLine {
             } => {
                 validate_number(*used, "used")?;
                 validate_number(*limit, "limit")?;
-                if *limit == 0.0 || used > limit {
+                if *limit == 0.0 {
                     return Err(ContractError::Invalid(
-                        "progress requires 0 <= used <= limit and a positive limit".to_owned(),
+                        "progress requires a positive limit".to_owned(),
                     ));
                 }
                 if let Some(timestamp) = resets_at {

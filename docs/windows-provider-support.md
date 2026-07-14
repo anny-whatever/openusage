@@ -6,15 +6,17 @@ source against a real native Windows installation and the provider's current beh
 
 The P1 probe ran on Windows 11 x64 build `10.0.26200`. It checked only path existence, environment
 variable names, and process names. It did not read credential files, databases, environment values,
-process command lines, or Windows Credential Manager entries.
+process command lines, or Windows Credential Manager entries. P3 then exercised the three established
+providers through the trusted backend; its native probe reports only provider ID, outcome category,
+metric count, and history availability.
 
 ## Source Matrix
 
 | Provider | Ordered native Windows sources | P1 host evidence | Remaining validation |
 | --- | --- | --- | --- |
-| Claude | `CLAUDE_CONFIG_DIR/.credentials.json`; `%USERPROFILE%/.claude/.credentials.json`; verified Windows Credential Manager target if Claude Code uses one; `CLAUDE_CODE_OAUTH_TOKEN` as inference-only metadata; native Claude Desktop storage only if its DPAPI/cookie format is safely supported | Default credentials file exists; no override or OAuth-token environment name is present | Credential Manager target naming and Claude Desktop access are unknown and must not be guessed in P3 |
-| Codex | `CODEX_HOME/auth.json`; `%USERPROFILE%/.config/codex/auth.json`; `%USERPROFILE%/.codex/auth.json`; verified Windows Credential Manager target if present. History comes from the selected home's `sessions` and `archived_sessions` | `CODEX_HOME` is present by name; default auth and sessions paths exist | Confirm override path without logging it; verify whether native Codex writes Credential Manager data in P3 |
-| Cursor | `%APPDATA%/Cursor/User/globalStorage/state.vscdb`; verified Windows Credential Manager targets for access and refresh tokens; authenticated account export for history | Cursor state database and running Cursor processes exist | Prove read-only WAL handling and exact Credential Manager target names in P3 |
+| Claude | `CLAUDE_CONFIG_DIR/.credentials.json` when set; otherwise `%USERPROFILE%/.claude/.credentials.json`. History comes from the selected root's `projects` tree | Default credentials and history were exercised through bounded, incremental readers | Windows Credential Manager and Claude Desktop sources remain disabled because their target and format are unverified |
+| Codex | `CODEX_HOME/auth.json` when set; otherwise `%USERPROFILE%/.config/codex/auth.json`, then `%USERPROFILE%/.codex/auth.json`. History comes from every selected home's `sessions` and `archived_sessions` | Override/default auth and session roots were exercised without reporting paths or values | API-key-only authentication cannot provide subscription usage; unverified Credential Manager sources remain disabled |
+| Cursor | `%APPDATA%/Cursor/User/globalStorage/state.vscdb`; authenticated account export for history | Locked WAL-mode SQLite, session-only token refresh, and account-wide export were exercised without modifying the source database | Unverified Windows Credential Manager targets remain disabled |
 | Antigravity | Native `language_server` or `agy` process discovery plus loopback quota service; `%APPDATA%/Antigravity IDE/User/globalStorage/state.vscdb` and legacy `%APPDATA%/Antigravity/User/globalStorage/state.vscdb` only for verified non-secret metadata; verified Windows Credential Manager target for the `gemini` / `antigravity` token | No matching database or process was present | Process command-line access, local TLS, and Credential Manager naming remain unknown for P4 |
 | Copilot | `%APPDATA%/github-copilot/apps.json` then `hosts.json` when native clients create them; `%APPDATA%/GitHub CLI/hosts.yml`; verified GitHub CLI Windows Credential Manager target | None of the candidate files was present | Confirm GitHub CLI and editor storage order and Credential Manager naming in P4 |
 | Devin | `%USERPROFILE%/.local/share/devin/credentials.toml`; `%APPDATA%/Devin/User/globalStorage/state.vscdb`; `%APPDATA%/Devin - Next/User/globalStorage/state.vscdb` | No candidate source was present | Validate whether the CLI uses the cross-platform home path and prove locked SQLite handling in P4 |
@@ -34,6 +36,8 @@ process command lines, or Windows Credential Manager entries.
   refresh contract explicitly requires updating the same verified credential source.
 - Third-party Windows Credential Manager access stays disabled until the exact target, persistence
   behavior, and account scoping are reproduced without logging secrets.
+- Claude and Codex refresh only their verified source file, with generation checks and atomic
+  replacement. Cursor refresh tokens stay in memory and OpenUsage never writes Cursor's database.
 - WSL distributions are outside this matrix. No fallback crosses into WSL automatically.
 - Real-provider verification records only source kind, outcome category, and normalized response shape.
   Tokens, cookies, usernames, tenant identifiers, raw rows, and full paths are not captured.

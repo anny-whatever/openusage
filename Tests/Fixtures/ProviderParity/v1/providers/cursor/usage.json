@@ -1,0 +1,9 @@
+{
+  "enabled": true,
+  "planUsage": {
+    "limit": 2000,
+    "totalSpend": 500,
+    "autoPercentUsed": 20,
+    "apiPercentUsed": 10
+  }
+}

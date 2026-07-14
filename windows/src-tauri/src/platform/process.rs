@@ -10,7 +10,7 @@ use async_trait::async_trait;
 const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
 const DEFAULT_OUTPUT_LIMIT: usize = 1024 * 1024;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct ProcessRequest {
     pub program: OsString,
     pub arguments: Vec<OsString>,

@@ -27,7 +27,7 @@ impl Default for HttpClientConfig {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct HttpRequest {
     pub method: Method,
     pub url: Url,
@@ -35,10 +35,16 @@ pub struct HttpRequest {
     pub body: Option<Vec<u8>>,
 }
 
-#[derive(Debug, Eq, PartialEq)]
 pub struct HttpResponse {
     pub status: StatusCode,
+    pub headers: reqwest::header::HeaderMap,
     pub body: Vec<u8>,
+}
+
+impl HttpResponse {
+    pub fn header(&self, name: &str) -> Option<&str> {
+        self.headers.get(name)?.to_str().ok()
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -112,6 +118,7 @@ impl BoundedHttpClient {
             return Err(HttpError::ResponseTooLarge);
         }
         let status = response.status();
+        let headers = response.headers().clone();
         let mut stream = response.bytes_stream();
         let mut body = Vec::with_capacity(16 * 1024);
         loop {
@@ -126,7 +133,11 @@ impl BoundedHttpClient {
             }
             body.extend_from_slice(&chunk);
         }
-        Ok(HttpResponse { status, body })
+        Ok(HttpResponse {
+            status,
+            headers,
+            body,
+        })
     }
 }
 

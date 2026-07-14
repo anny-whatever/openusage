@@ -1,0 +1,3 @@
+Date,Model,Input (w/ Cache Write),Input (w/o Cache Write),Cache Read,Output Tokens
+2026-07-14 12:00:00,cursor-model,0,100,0,50
+2026-07-14 12:00:00,cursor-model,0,100,0,50

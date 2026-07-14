@@ -158,7 +158,7 @@ enum ProviderWireMetricLine: Decodable {
         case .progress(_, let used, let limit, let format, let resetsAt, let periodDurationMs, let colorHex):
             try ProviderWireValidation.number(used, field: "used")
             try ProviderWireValidation.number(limit, field: "limit")
-            guard limit > 0, used <= limit else { throw ProviderWireContractError.invalid("invalid progress range") }
+            guard limit > 0 else { throw ProviderWireContractError.invalid("invalid progress range") }
             try format.validate()
             try ProviderWireValidation.color(colorHex)
             if let resetsAt { try ProviderWireValidation.timestamp(resetsAt, field: "resetsAt") }

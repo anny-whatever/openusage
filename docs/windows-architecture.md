@@ -107,6 +107,25 @@ successful snapshot for five minutes. Failed snapshots are not persisted, missin
 successful response preserves the last successful history, and wake notifications use a one-item
 channel so repeated resume or settings events cannot create an unbounded queue.
 
+## P3 Established Providers
+
+Claude, Codex, and Cursor run behind the shared `ProviderRuntime` boundary. Each provider owns a small
+auth store, bounded API client, mapper, and history reader while returning only normalized snapshots.
+
+- Claude and Codex read ordered native credential files and atomically persist a refreshed token only
+  after confirming the file still contains the token that was read.
+- Cursor snapshots its locked WAL-mode database for read-only queries. Refreshed Cursor tokens remain
+  session-only and are never written back to Cursor storage.
+- Claude and Codex JSONL history uses capped discovery, file-size, entry, and cache limits. Cursor
+  downloads one account-wide CSV with strict row and column bounds.
+- Model prices are injected through a catalog. Unknown models retain token totals without inventing
+  spend.
+- Codex reset credits require a confirmation capability, retain at most 64 idempotency mappings, and
+  force a reconciled refresh after every claim outcome.
+
+Provider fixture responses live under `Tests/Fixtures/ProviderParity/v1/providers`. The opt-in native
+probe emits no credential paths, account identifiers, request bodies, or error details.
+
 ## Storage and Credentials
 
 Application state lives below the Tauri-resolved local application data directory and is written through
