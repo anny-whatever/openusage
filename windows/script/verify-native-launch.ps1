@@ -1,10 +1,15 @@
 param(
     [string] $Executable = (Join-Path $env:LOCALAPPDATA "OpenUsage\build-target\release\openusage-windows.exe"),
+    [string] $ScreenshotPath,
     [switch] $ExpectHidden,
     [switch] $VerifyQuit
 )
 
 $ErrorActionPreference = "Stop"
+
+if ($ScreenshotPath) {
+    Add-Type -AssemblyName System.Drawing
+}
 
 Add-Type -TypeDefinition @"
 using System;
@@ -159,6 +164,31 @@ try {
         throw "OpenUsage window bounds could not be read."
     }
 
+    if ($ScreenshotPath) {
+        $screenshotDirectory = Split-Path -Parent $ScreenshotPath
+        if ($screenshotDirectory) {
+            $null = New-Item -ItemType Directory -Path $screenshotDirectory -Force
+        }
+        $windowWidth = $windowRectangle.Right - $windowRectangle.Left
+        $windowHeight = $windowRectangle.Bottom - $windowRectangle.Top
+        $bitmap = New-Object System.Drawing.Bitmap($windowWidth, $windowHeight)
+        $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+        try {
+            $graphics.CopyFromScreen(
+                $windowRectangle.Left,
+                $windowRectangle.Top,
+                0,
+                0,
+                $bitmap.Size
+            )
+            $bitmap.Save($ScreenshotPath, [System.Drawing.Imaging.ImageFormat]::Png)
+        }
+        finally {
+            $graphics.Dispose()
+            $bitmap.Dispose()
+        }
+    }
+
     $probe = [ordered]@{
         executable = $Executable
         processId = $process.Id
@@ -173,6 +203,7 @@ try {
         handleCount = $process.HandleCount
         workingSetBytes = $process.WorkingSet64
         privateMemoryBytes = $process.PrivateMemorySize64
+        screenshotPath = if ($ScreenshotPath) { $ScreenshotPath } else { $null }
     }
 
     $probe | ConvertTo-Json -Compress

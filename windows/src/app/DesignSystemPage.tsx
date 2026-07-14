@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
@@ -45,6 +47,7 @@ export function DesignSystemPage({ onClose }: DesignSystemPageProps) {
         <ButtonCard />
         <FeedbackCard />
         <FormCard />
+        <DisplayCard />
       </section>
     </main>
   )
@@ -155,6 +158,46 @@ function FormCard() {
         <div className="flex items-center justify-between gap-4">
           <Label htmlFor="provider-enabled">Provider Enabled</Label>
           <Switch id="provider-enabled" defaultChecked />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function DisplayCard() {
+  return (
+    <Card className="gap-4 py-5">
+      <CardHeader className="px-5">
+        <CardTitle>Usage Display</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4 px-5">
+        <div className="space-y-2">
+          <Label htmlFor="catalog-theme">Theme</Label>
+          <NativeSelect id="catalog-theme" defaultValue="system">
+            <NativeSelectOption value="system">System</NativeSelectOption>
+            <NativeSelectOption value="light">Light</NativeSelectOption>
+            <NativeSelectOption value="dark">Dark</NativeSelectOption>
+          </NativeSelect>
+        </div>
+        <div className="space-y-2">
+          <Label>Healthy Progress</Label>
+          <Progress aria-label="Healthy progress at 45 percent" value={45} />
+        </div>
+        <div className="space-y-2">
+          <Label>Warning Progress</Label>
+          <Progress
+            aria-label="Warning progress at 82 percent"
+            className="[&_[data-slot=progress-indicator]]:bg-warning"
+            value={82}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Critical Progress</Label>
+          <Progress
+            aria-label="Critical progress at 95 percent"
+            className="[&_[data-slot=progress-indicator]]:bg-destructive"
+            value={95}
+          />
         </div>
       </CardContent>
     </Card>

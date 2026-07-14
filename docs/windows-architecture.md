@@ -143,6 +143,34 @@ The remaining provider set follows the same `ProviderRuntime` contract and fixed
   live provider reports an explicit limitation until a verified Windows source exposes its loopback
   port and CSRF token without unsafe process-command-line scraping.
 
+## P5 Windows Interface
+
+The Windows panel renders the normalized provider contract without re-reading provider files or
+reconstructing business data in the WebView.
+
+- The dashboard distinguishes loading, empty, unauthorized, stale, partial, provider-error, and
+  successful states. Missing values stay missing; the interface never substitutes zero usage.
+- Every normalized text, value, progress, badge, chart, reset, warning, history, and plan field has a
+  typed renderer. Total Spend includes only documented `Today` spend lines, so balances and API credits
+  cannot inflate it.
+- Progress rows share one 30-second clock that starts with the first subscriber and stops with the last.
+  Countdown updates therefore do not rerender the dashboard tree or accumulate per-row timers.
+- Layout settings preserve provider and metric order, visibility, Always Visible versus On Demand, and
+  starred metrics. Validation rejects unknown providers, duplicate order entries, oversized layouts,
+  invalid identifiers, and hidden starred metrics before atomic persistence.
+- At least one enabled metric remains visible and at least one remains above the On Demand fold. Undo is
+  capped at 20 interface changes and never grows for the lifetime of the process.
+- OpenRouter and Z.ai key fields send a new key through a narrow command once. The backend returns only
+  protected-storage status; read-back is impossible through IPC.
+- Windows services that belong to later parents—live refresh composition, reset claiming, notifications,
+  startup registration, global shortcuts, screenshot export, CLI installation, and signed updates—stay
+  visibly disabled with their delivery parent named. The interface never reports those actions as
+  successful before their native implementation exists.
+
+Settings schema 3 migrates provider enablement and launch preference from schemas 1 and 2 while adding
+appearance, density, usage display, notification, privacy, logging, update, and bounded layout state.
+Malformed or semantically invalid payloads recover to documented defaults and are replaced atomically.
+
 ## Storage and Credentials
 
 Application state lives below the Tauri-resolved local application data directory and is written through

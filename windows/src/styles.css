@@ -20,6 +20,7 @@
   --accent: oklch(0.93 0.025 244);
   --accent-foreground: oklch(0.24 0.05 244);
   --destructive: oklch(0.56 0.21 28);
+  --warning: oklch(0.72 0.15 75);
   --border: oklch(0.88 0 0);
   --input: oklch(0.88 0 0);
   --ring: oklch(0.55 0.14 244);
@@ -54,6 +55,7 @@
   --accent: oklch(0.3 0.04 244);
   --accent-foreground: oklch(0.96 0 0);
   --destructive: oklch(0.68 0.19 25);
+  --warning: oklch(0.78 0.14 75);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 16%);
   --ring: oklch(0.67 0.12 244);
@@ -89,6 +91,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -120,9 +123,23 @@
     @apply m-0 min-w-80 bg-background font-sans text-foreground antialiased;
   }
 
+  html[data-density="compact"] body {
+    --spacing: 0.22rem;
+  }
+
   button,
   [role="button"] {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
+  }
+}
+
+@media (forced-colors: active) {
+  * {
+    forced-color-adjust: auto;
+  }
+
+  [data-slot="progress-indicator"] {
+    background: Highlight;
   }
 }
 
@@ -136,4 +153,3 @@
     transition-duration: 0.01ms !important;
   }
 }
-

@@ -1,11 +1,11 @@
 use std::ffi::OsStr;
 
-use serde::Serialize;
 use tauri::image::Image;
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{Manager, WindowEvent};
 
+mod app_state;
 pub mod contracts;
 pub mod platform;
 pub mod providers;
@@ -23,21 +23,50 @@ enum ShellMenuAction {
     Ignore,
 }
 
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct ScaffoldStatus {
-    platform: &'static str,
-    architecture: &'static str,
-    trusted_backend: bool,
+#[tauri::command]
+async fn get_app_bootstrap(
+    state: tauri::State<'_, app_state::AppState>,
+) -> Result<app_state::AppBootstrap, String> {
+    state.bootstrap().await
 }
 
 #[tauri::command]
-fn get_scaffold_status() -> ScaffoldStatus {
-    ScaffoldStatus {
-        platform: "windows",
-        architecture: std::env::consts::ARCH,
-        trusted_backend: true,
+async fn save_settings(
+    state: tauri::State<'_, app_state::AppState>,
+    settings: runtime::settings::Settings,
+) -> Result<app_state::AppBootstrap, String> {
+    state.save_settings(settings).await
+}
+
+#[tauri::command]
+async fn save_api_key(
+    state: tauri::State<'_, app_state::AppState>,
+    provider_id: String,
+    key: String,
+) -> Result<providers::api_key::ApiKeyStatus, String> {
+    state.save_api_key(&provider_id, key).await
+}
+
+#[tauri::command]
+async fn delete_api_key(
+    state: tauri::State<'_, app_state::AppState>,
+    provider_id: String,
+) -> Result<providers::api_key::ApiKeyStatus, String> {
+    state.delete_api_key(&provider_id).await
+}
+
+#[tauri::command]
+fn report_ui_error(kind: String) -> Result<(), String> {
+    if kind.is_empty()
+        || kind.len() > 64
+        || !kind
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b' ' | b'-' | b'_'))
+    {
+        return Err("Invalid interface error category.".to_owned());
     }
+    eprintln!("OpenUsage interface error category: {kind}");
+    Ok(())
 }
 
 fn show_main_window(app: &tauri::AppHandle) -> Result<(), String> {
@@ -113,7 +142,13 @@ fn tray_icon() -> Image<'static> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![get_scaffold_status])
+        .invoke_handler(tauri::generate_handler![
+            get_app_bootstrap,
+            save_settings,
+            save_api_key,
+            delete_api_key,
+            report_ui_error
+        ])
         .on_window_event(|window, event| {
             if window.label() == MAIN_WINDOW_LABEL
                 && let WindowEvent::CloseRequested { api, .. } = event
@@ -125,6 +160,10 @@ pub fn run() {
             }
         })
         .setup(|app| {
+            let paths = platform::paths::WindowsPaths::from_environment()?;
+            let state = tauri::async_runtime::block_on(app_state::AppState::load(paths))
+                .map_err(std::io::Error::other)?;
+            app.manage(state);
             let show_item =
                 MenuItem::with_id(app, SHOW_MENU_ID, "Show OpenUsage", true, None::<&str>)?;
             let quit_item =
@@ -179,15 +218,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn scaffold_status_exposes_only_platform_metadata() {
-        let status = get_scaffold_status();
-
-        assert_eq!(status.platform, "windows");
-        assert!(!status.architecture.is_empty());
-        assert!(status.trusted_backend);
-    }
-
-    #[test]
     fn tray_icon_has_a_bounded_rgba_buffer() {
         let icon = tray_icon();
 
@@ -204,5 +234,12 @@ mod tests {
         assert_eq!(shell_menu_action(SHOW_MENU_ID), ShellMenuAction::Show);
         assert_eq!(shell_menu_action(QUIT_MENU_ID), ShellMenuAction::Quit);
         assert_eq!(shell_menu_action("unknown"), ShellMenuAction::Ignore);
+    }
+
+    #[test]
+    fn interface_error_reporting_accepts_categories_not_payloads() {
+        assert!(report_ui_error("TypeError".to_owned()).is_ok());
+        assert!(report_ui_error("token=value".to_owned()).is_err());
+        assert!(report_ui_error("x".repeat(65)).is_err());
     }
 }
