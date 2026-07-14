@@ -126,6 +126,23 @@ auth store, bounded API client, mapper, and history reader while returning only 
 Provider fixture responses live under `Tests/Fixtures/ProviderParity/v1/providers`. The opt-in native
 probe emits no credential paths, account identifiers, request bodies, or error details.
 
+## P4 Remaining Providers
+
+The remaining provider set follows the same `ProviderRuntime` contract and fixed refresh bounds.
+
+- Copilot reads editor and GitHub CLI files in order, scopes tokens to `github.com`, and bounds
+  organization billing discovery to 100 organizations.
+- Devin validates custom servers as HTTPS and snapshots both native app databases before querying.
+- Grok atomically rotates only the credential entry it loaded and incrementally scans one capped JSONL
+  history file with per-process model attribution.
+- OpenCode snapshots at most 32 release-channel databases, scans at most 100,000 hosted rows, and
+  calculates rolling session, UTC-week, and anchored-month Go windows without network access.
+- OpenRouter and Z.ai accept key material once into the trusted backend. App-owned keys are DPAPI
+  protected; status, replacement, deletion, and environment fallback expose no stored value.
+- Antigravity process detection uses the Windows ToolHelp API. The quota mapper is implemented, but the
+  live provider reports an explicit limitation until a verified Windows source exposes its loopback
+  port and CSRF token without unsafe process-command-line scraping.
+
 ## Storage and Credentials
 
 Application state lives below the Tauri-resolved local application data directory and is written through

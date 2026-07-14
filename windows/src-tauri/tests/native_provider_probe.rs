@@ -6,9 +6,16 @@ use openusage_windows_lib::contracts::Validate;
 use openusage_windows_lib::platform::http::{BoundedHttpClient, HttpClientConfig, HttpTransport};
 use openusage_windows_lib::platform::paths::WindowsPaths;
 use openusage_windows_lib::providers::FixedPricing;
+use openusage_windows_lib::providers::antigravity::AntigravityProvider;
 use openusage_windows_lib::providers::claude::{ClaudeAuthStore, ClaudeProvider};
 use openusage_windows_lib::providers::codex::{CodexAuthStore, CodexProvider};
+use openusage_windows_lib::providers::copilot::{CopilotAuthStore, CopilotProvider};
 use openusage_windows_lib::providers::cursor::{CursorAuthStore, CursorProvider};
+use openusage_windows_lib::providers::devin::{DevinAuthStore, DevinProvider};
+use openusage_windows_lib::providers::grok::{GrokAuthStore, GrokProvider};
+use openusage_windows_lib::providers::opencode::{OpenCodeAuthStore, OpenCodeProvider};
+use openusage_windows_lib::providers::openrouter::OpenRouterProvider;
+use openusage_windows_lib::providers::zai::ZaiProvider;
 use openusage_windows_lib::runtime::refresh::ProviderRuntime;
 use tokio_util::sync::CancellationToken;
 
@@ -35,9 +42,28 @@ async fn native_provider_probe_reports_only_safe_outcomes() {
         )),
         Arc::new(CursorProvider::new(
             CursorAuthStore::from_windows(&paths),
-            http,
+            http.clone(),
+            pricing.clone(),
+        )),
+        Arc::new(AntigravityProvider),
+        Arc::new(CopilotProvider::new(
+            CopilotAuthStore::from_windows(&paths),
+            http.clone(),
+        )),
+        Arc::new(DevinProvider::new(
+            DevinAuthStore::from_windows(&paths),
+            http.clone(),
+        )),
+        Arc::new(GrokProvider::new(
+            GrokAuthStore::from_windows(&paths).expect("Grok source configuration"),
+            http.clone(),
             pricing,
         )),
+        Arc::new(OpenCodeProvider::new(
+            OpenCodeAuthStore::from_windows(&paths).expect("OpenCode source configuration"),
+        )),
+        Arc::new(OpenRouterProvider::from_windows(&paths, http.clone())),
+        Arc::new(ZaiProvider::from_windows(&paths, http)),
     ];
 
     for provider in providers {

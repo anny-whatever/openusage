@@ -1,0 +1,16 @@
+{
+  "usageItems": [
+    {
+      "product": "Copilot",
+      "unitType": "ai-credits",
+      "grossQuantity": 125,
+      "netAmount": 18.75
+    },
+    {
+      "product": "Copilot",
+      "unitType": "seats",
+      "grossQuantity": 10,
+      "netAmount": 100
+    }
+  ]
+}

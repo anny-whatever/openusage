@@ -10,6 +10,7 @@ use crate::contracts::{
     UsageDay, UsageHistory,
 };
 use crate::platform::secret::SecretBytes;
+use crate::runtime::refresh::ProviderFailure;
 
 pub const SESSION_PERIOD_MS: u64 = 5 * 60 * 60 * 1000;
 pub const WEEK_PERIOD_MS: u64 = 7 * 24 * 60 * 60 * 1000;
@@ -163,6 +164,16 @@ pub fn snapshot(
         usage_history,
         warning,
         error_category: None,
+    }
+}
+
+pub fn provider_failure(error: ProviderError) -> ProviderFailure {
+    ProviderFailure {
+        category: serde_json::to_value(error.category)
+            .ok()
+            .and_then(|value| value.as_str().map(str::to_owned))
+            .unwrap_or_else(|| "other".to_owned()),
+        message: error.message,
     }
 }
 

@@ -55,12 +55,12 @@ fn valid_environment_name(name: &str) -> bool {
 #[cfg(windows)]
 fn os_string_bytes(value: OsString) -> SecretBytes {
     use std::os::windows::ffi::OsStrExt;
+    use zeroize::Zeroize;
 
-    let bytes = value
-        .encode_wide()
-        .flat_map(u16::to_le_bytes)
-        .collect::<Vec<_>>();
-    SecretBytes::new(bytes)
+    let mut wide = value.encode_wide().collect::<Vec<_>>();
+    let text = String::from_utf16_lossy(&wide);
+    wide.zeroize();
+    SecretBytes::new(text.into_bytes())
 }
 
 #[cfg(not(windows))]
